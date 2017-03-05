@@ -60,7 +60,7 @@ function(){
 						flag: "icons",
 						mousedownFn : setLisPositionToAbsoulte,
 						mouseupFn : function(evt){
-							reorderLists(evt.clientX,evt.clientY,evt.target.parentNode,parentNode);
+							reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
 							setLisPositionToNull();
 						}
 					});
@@ -70,7 +70,7 @@ function(){
 						flag: "icons",
 						mousedownFn : setLisPositionToAbsoulte,
 						mouseupFn : function(evt){
-							reorderLists(evt.clientX,evt.clientY,evt.target.parentNode,parentNode);
+							reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
 							setLisPositionToNull();
 						}
 					});
