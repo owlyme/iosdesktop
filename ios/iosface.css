@@ -43,6 +43,7 @@ nav div.top span{
 	height: 12px;
 	line-height: 12px;
 	font-size: 8px;
+	cursor: default;
 }
 .left{
 	text-align: left;
@@ -80,6 +81,7 @@ section ul.middle li div , section ul.bottom li div {
 }
 section ul.middle {
 	height: 360px;
+	left: 0px;
 }
 section ul.bottom{
 	height: 60px;
@@ -165,6 +167,8 @@ footer button{
 	overflow: hidden;
 	width: 260px;
 	height: 0px;
+	background: rgba(80,80,80,0.9);
+	z-index: 9;
 }
 .showTopMessage{
 	overflow: hidden;
@@ -177,7 +181,9 @@ footer button{
 }
 .bottomControl{
 	height: 0px;
+	width: 240px;
 	overflow: hidden;
+	background: rgba(80,80,80,0.9);
 }
 .showBottomControl{
 	overflow: hidden;
@@ -188,10 +194,20 @@ footer button{
 	height: 240px;
 	background: rgba(80,80,80,0.9);	
 }
-.trasform{	
-	transition:height .5s,right .4s,top .4s,opacity .6s ;
-	-moz-transition:height .5s,right .4s,top .4s,opacity .6s, -moz-transform .4s; /* Firefox 4 */
-	-webkit-transition:height .5s,right .4s,top .4s,opacity .6s, -webkit-transform .4s; /* Safari and Chrome */
+.ulMiddleMoveLeft{
+	position: absolute;
+	width: 240px;
+	left: -260px;
+}
+.ulMiddleMoveRight{
+	position: absolute;
+	width: 240px;
+	left: 260px;
+}
+.transform{	
+	transition:height .5s,left .4s,top .4s,opacity .6s ;
+	-moz-transition:height .5s,left .4s,top .4s,opacity .6s, -moz-transform .4s; /* Firefox 4 */
+	-webkit-transition:height .5s,left .4s,top .4s,opacity .6s, -webkit-transform .4s; /* Safari and Chrome */
 }
 
 
