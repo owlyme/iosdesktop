@@ -71,7 +71,7 @@ section{
 	background:  ;
 }
 
-section ul.middle, section ul.bottom{	
+section ul.middle,section ul.middleLeft,section ul.middleRight, section ul.bottom{	
 	position: absolute;
 	padding: 0px 10px;
 	width: 260px;
@@ -82,6 +82,14 @@ section ul.middle li div , section ul.bottom li div {
 section ul.middle {
 	height: 360px;
 	left: 0px;
+}
+section ul.middleLeft{
+	left: -260px;
+	height: 360px;
+}
+section ul.middleRight{
+	left: 260px;
+	height: 360px;
 }
 section ul.bottom{
 	height: 60px;
@@ -95,10 +103,10 @@ section ul.middle li, section ul.bottom li{
 	height: 60px;
 	padding: 12.5px;
 }
-section  h5{
+footer h5{
 	position: absolute;
 	width: 240px;
-	bottom: 76px;
+	top: -80px;
 	left: 10px;
 	color: #777;
 	text-align: center;
@@ -146,6 +154,7 @@ section  h5{
 }
 
 footer {
+	position: relative;
 	padding: 10px;
 	border-radius: 0  0 40px 40px;
 	border-top: none;
@@ -180,6 +189,9 @@ footer button{
 	z-index: 9;
 }
 .bottomControl{
+	position: absolute;
+	bottom: 61px;
+	left: 10px;
 	height: 0px;
 	width: 240px;
 	overflow: hidden;
@@ -189,7 +201,7 @@ footer button{
 	overflow: hidden;
 	width: 240px;
 	position: absolute;
-	bottom: 0px;
+	bottom: 61px;
 	left: 10px;
 	height: 240px;
 	background: rgba(80,80,80,0.9);	

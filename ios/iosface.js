@@ -1,7 +1,11 @@
 $(
 function(){
 	function selectors(nodeName){
-		return document.querySelectorAll(nodeName);
+		if( nodeName.indexOf("#") == 0) {
+			return document.querySelector(nodeName);
+		}else{
+			return document.querySelectorAll(nodeName);
+		}
 	};
 
 	selectors("nav span.center")[0].innerText= (new Date()).toString().substring(16,21);
@@ -10,9 +14,14 @@ function(){
 		},1000);
 
 	var IOS={
-		flag: true,		
+		animationFlag: false,	
+		messageBoxflag : false,
+		bottomBoxflag : false,
+
 		section:selectors("section")[0],
+
 		icons: selectors("section ul li"),
+
 		ulMiddle: selectors("ul.middle")[0],
 		iconsMiddle: selectors("ul.middle li"),
 		topMessage:selectors('.topMessage')[0],
@@ -20,8 +29,6 @@ function(){
 		ulBottom: selectors("ul.bottom")[0],
 		iconsBottom: selectors("ul.bottom li"),
 		removeIconButton: selectors('.close'),
-
-		
 
 		refresh : function(){
 			this.icons = selectors("section ul li");
@@ -44,7 +51,7 @@ function(){
 	IOS.hideShowElements =function(){			
 		selectors("button")[0].addEventListener('mousedown',hide);
 	};
-	IOS.removeIcon = function(){		
+	IOS.removeIcon = function(){
 		for (var j = 0; j<IOS.removeIconButton.length; j++) {
 			IOS.removeIconButton[j].addEventListener('mousedown',function(event){
 				event.stopPropagation();
@@ -54,7 +61,7 @@ function(){
 		};
 	};
 	IOS.dragIcons = function(){
-		if(IOS.flag){
+		if(IOS.animationFlag){
 			for(var i=0 ; i< this.icons.length; i++){
 				var movebox = this.icons[i];
 				drag({
@@ -86,7 +93,7 @@ function(){
 	IOS.removeIcon();
 
 function show(){
-	IOS.flag= true;
+	IOS.animationFlag= true;
 	IOS.dragIcons();
 
 	for (var j = 0; j<IOS.removeIconButton.length; j++) {
@@ -97,15 +104,20 @@ function show(){
 	};
 };
 function hide(){
-	IOS.flag= false;
+	IOS.animationFlag= false;
+	IOS.messageBoxflag = false;
+	IOS.bottomBoxflag = false;
 	for (var j = 0; j<IOS.removeIconButton.length; j++) {
 			IOS.removeIconButton[j].style.display="none";
 			IOS.icons[j].className="";
 		};
-	if(IOS.topMessage.className == "transform showTopMessage")
-		IOS.topMessage.className="topMessage transform";
+	
+	IOS.topMessage.className = "topMessage transform";
+	
 	IOS.bottomControl.className="bottomControl transform";
-	IOS.ulMiddle.className ="middle";
+
+	//IOS.ulMiddle.className ="middle";
+
 };
 function drag(arg) {
 	var parentNode= arg.parentNode ,
@@ -127,7 +139,7 @@ function drag(arg) {
 	}
 	function mouseMoved(evt) {
 		evt.preventDefault();
-		if(!IOS.flag) return;
+		if(!IOS.animationFlag) return;
 		movebox.style.position= "absolute";
 		movebox.style.zIndex= 1;
 
@@ -238,6 +250,7 @@ function randomNumber(maxNum){
 
 
 function mouseMovingDirectionFunction(arg){
+	if(IOS.animationFlag) return;
 	var direction, stepX, stepY, clientX, clientY;
 	IOS.startPoint = [0,0],
 	IOS.endPoint = [0,0];
@@ -254,36 +267,35 @@ function mouseMovingDirectionFunction(arg){
 	};
 	function orient(evt){
 		if (0 <= clientX <= 260 && -12<=clientY <=420) {
-		IOS.endPoint= [evt.clientX, evt.clientY];
-		stepX =IOS.endPoint[0]-IOS.startPoint[0];
-		stepY =IOS.endPoint[1]-IOS.startPoint[1];
-		if( Math.abs(stepX) > Math.abs(stepY) && Math.abs(stepX) >20){
-			if(stepX >0 && arg.slipeTorightFn){
-				arg.slipeTorightFn(evt);
-			}else if( stepX <0 && arg.slipeToleftFn ){
-				arg.slipeToleftFn(evt);
+			IOS.endPoint= [evt.clientX, evt.clientY];
+			stepX =IOS.endPoint[0]-IOS.startPoint[0];
+			stepY =IOS.endPoint[1]-IOS.startPoint[1];
+			if( Math.abs(stepX) > Math.abs(stepY) && Math.abs(stepX) >20){
+				if(stepX >0 && arg.slipeTorightFn){
+					arg.slipeTorightFn(evt);
+				}else if( stepX <0 && arg.slipeToleftFn ){
+					arg.slipeToleftFn(evt);
+				};
+			}else if( Math.abs(stepX) <= Math.abs(stepY) && Math.abs(stepY) >20 ){
+				if( stepY <0 && arg.slipeToupFn){
+					arg.slipeToupFn(evt);
+				}else if(  stepY >0 && arg.slipeTodownFn ){
+					arg.slipeTodownFn(evt);
+				};
 			};
-		}else if( Math.abs(stepX) <= Math.abs(stepY) && Math.abs(stepY) >20 ){
-			if(stepY >0 && arg.slipeToupFn){
-				arg.slipeToupFn(evt);
-			}else if( stepY <0 && arg.slipeTodownFn ){
-				arg.slipeTodownFn(evt);
-			};
+			//document.removeEventListener("mousedown",getStart);
+			//document.removeEventListener("mouseup",orient);
 		};
-		//document.removeEventListener("mousedown",getStart);
-		//document.removeEventListener("mouseup",orient);
-	};
 	};
 }
 mouseMovingDirectionFunction({
 	slipeToleftFn : function(evt){
-		if(0 <(IOS.startPoint[0] -IOS.section.offsetLeft) && 
+		if( 0 <(IOS.startPoint[0] -IOS.section.offsetLeft) && 
 				(IOS.startPoint[0] -IOS.section.offsetLeft)<= 260 ){
 				var ulMiddleLeft = parseInt(getStyle(IOS.ulMiddle, "left"));
 					IOS.ulMiddle.className ="middle transform ";
 					IOS.ulMiddle.style.left = ulMiddleLeft-260+"px";
-
-				}				
+				};
 			},
 	slipeTorightFn : function(evt){
 		if( 0 < (IOS.startPoint[0] -IOS.section.offsetLeft) &&
@@ -291,19 +303,38 @@ mouseMovingDirectionFunction({
 				var ulMiddleLeft = parseInt(getStyle(IOS.ulMiddle, "left"));
 					IOS.ulMiddle.className ="middle transform ";
 					IOS.ulMiddle.style.left = ulMiddleLeft+260+"px";
-				}
+				};
 			},
 	slipeToupFn : function(evt){
-		if( -12 <(IOS.startPoint[1] -IOS.section.offsetTop) && 
-				(IOS.startPoint[1] -IOS.section.offsetTop)<= 0 )
-				IOS.topMessage.className="transform showTopMessage";
-			},
-	slipeTodownFn : function(evt){
+		if( IOS.messageBoxflag ){
+			IOS.topMessage.className = "topMessage transform";
+			IOS.messageBoxflag = false; 
+			return;
+		};
 		if( 400 < (IOS.startPoint[1] -IOS.section.offsetTop) &&
-			(IOS.startPoint[1] -IOS.section.offsetTop)<= 420)
+			(IOS.startPoint[1] -IOS.section.offsetTop)<= 420){
+				//if( IOS.messageBoxflag ) 
 				IOS.bottomControl.className="transform showBottomControl";
-			}
+				IOS.bottomBoxflag = true;			
+			};
+		},
+	slipeTodownFn : function(evt){
+		if( IOS.bottomBoxflag ){
+			IOS.bottomControl.className="bottomControl transform";
+			IOS.bottomBoxflag = false;
+			return;
+		};
+		if( -12 <(IOS.startPoint[1] -IOS.section.offsetTop) && 
+			(IOS.startPoint[1] -IOS.section.offsetTop)<= 0 ){
+			//	if( IOS.bottomBoxflag ) return;
+				IOS.topMessage.className="transform showTopMessage";
+				IOS.messageBoxflag = true;
+			};
+		}
 });
+
+console.log(selectors("#bottomBox"))
+
 
 //createUlclassMiddle();
 function createUlclassMiddle(){
@@ -311,9 +342,12 @@ function createUlclassMiddle(){
 		ul.className= "middle";
 		ul.style.left = "260px";
 	IOS.section.appendChild(ul);
-
 };
-
+//createUlclassMiddleInnerHTML()
+function createUlclassMiddleInnerHTML(){
+	var newUlMiddle='<ul class="middle"> <ul>';
+	IOS.section.innerHTML += newUlMiddle;
+}
 
 
 
@@ -330,6 +364,5 @@ function getStyle(element, attr) {
 	}
 	return value;
 }
-
 
 })
