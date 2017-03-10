@@ -70,8 +70,7 @@ section{
 	overflow: hidden;
 	background:  ;
 }
-
-section ul.middle,section ul.middleLeft,section ul.middleRight, section ul.bottom{	
+section ul.middle, section ul.middleLeft, section ul.middleRight, section ul.bottom{	
 	position: absolute;
 	padding: 0px 10px;
 	width: 260px;
@@ -96,8 +95,7 @@ section ul.bottom{
 	bottom: 0px;
 	background: #aaa;
 }
-
-section ul.middle li, section ul.bottom li{
+section ul li{
 	float: left;
 	width: 60px;
 	height: 60px;
@@ -196,6 +194,7 @@ footer button{
 	width: 240px;
 	overflow: hidden;
 	background: rgba(80,80,80,0.9);
+	z-index: 9;
 }
 .showBottomControl{
 	overflow: hidden;
@@ -205,6 +204,7 @@ footer button{
 	left: 10px;
 	height: 240px;
 	background: rgba(80,80,80,0.9);	
+	z-index: 9;
 }
 .ulMiddleMoveLeft{
 	position: absolute;

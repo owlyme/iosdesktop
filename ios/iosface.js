@@ -12,8 +12,9 @@ function(){
 	var CLOCK = setInterval(function(){
 			selectors("nav span.center")[0].innerText= (new Date()).toString().substring(16,21);
 		},1000);
-
+//IOS Object ------------------------------------------------------------------------------------1
 	var IOS={
+		activingFlag : false,
 		animationFlag: false,	
 		messageBoxflag : false,
 		bottomBoxflag : false,
@@ -23,13 +24,16 @@ function(){
 		icons: selectors("section ul li"),
 
 		ulMiddle: selectors("ul.middle")[0],
+		ulMiddleList: selectors("section ul.middle"),
 		iconsMiddle: selectors("ul.middle li"),
+
 		topMessage:selectors('.topMessage')[0],
 		bottomControl: selectors('.bottomControl')[0],
+
 		ulBottom: selectors("ul.bottom")[0],
 		iconsBottom: selectors("ul.bottom li"),
-		removeIconButton: selectors('.close'),
 
+		removeIconButton: selectors('.close'),
 		refresh : function(){
 			this.icons = selectors("section ul li");
 			this.removeIconButton= selectors('section ul li div');
@@ -38,86 +42,88 @@ function(){
 			this.removeIconButton= selectors('.close');
 		}
 	};
-
-	IOS.showHidenElements = function(){
-		for(var i=0 ; i< this.icons.length; i++){
-			this.icons[i].addEventListener("mousedown",function(evt){
-				var x =setTimeout(show,2000);
-				this.addEventListener("mouseup",function(){ clearTimeout(x)});
-				this.addEventListener("mouseout",function(){ clearTimeout(x)});
+//IOS functions ---------------------------------------------------------------------------------2
+IOS.showHidenElements = function(){
+	for(var i=0 ; i< this.icons.length; i++){
+		this.icons[i].addEventListener("mousedown",function(evt){
+			var x =setTimeout(show,2000);
+			this.addEventListener("mouseup",function(){ clearTimeout(x)});
+			this.addEventListener("mouseout",function(){ clearTimeout(x)});
+		});
+	};
+};
+IOS.hideShowElements =function(){			
+	selectors("button")[0].addEventListener('mousedown',hide);
+};
+IOS.removeIcon = function(){
+	for (var j = 0; j<IOS.removeIconButton.length; j++) {
+		IOS.removeIconButton[j].addEventListener('mousedown',function(event){
+			event.stopPropagation();
+			event.target.parentNode.parentNode.parentNode.removeChild(event.target.parentNode.parentNode);
+			IOS.refresh();
+		});
+	};
+};
+IOS.dragIcons = function(){
+	if(IOS.animationFlag){		
+	for(var i=0 ; i< IOS.icons.length; i++){
+		var movebox = IOS.icons[i];
+		for (var k = IOS.ulMiddleList.length - 1; k >= 0; k--) {
+			(function(i){
+				drag({
+					parentNode:IOS.ulMiddleList[k],
+					moveEle: i,
+					flag: "icons",
+					mousedownFn : setLisPositionToAbsoulte,
+					mouseupFn : function(evt){
+						reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
+						setLisPositionToNull();
+					}
+			})})(movebox);
+		};
+		drag({
+			parentNode:IOS.ulBottom,
+			moveEle: movebox,
+			flag: "icons",
+			mousedownFn : setLisPositionToAbsoulte,
+			mouseupFn : function(evt){
+				reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
+				setLisPositionToNull();
+				}
 			});
 		};
 	};
-	IOS.hideShowElements =function(){			
-		selectors("button")[0].addEventListener('mousedown',hide);
-	};
-	IOS.removeIcon = function(){
-		for (var j = 0; j<IOS.removeIconButton.length; j++) {
-			IOS.removeIconButton[j].addEventListener('mousedown',function(event){
-				event.stopPropagation();
-				event.target.parentNode.parentNode.parentNode.removeChild(event.target.parentNode.parentNode);
-				IOS.refresh();
-			});
-		};
-	};
-	IOS.dragIcons = function(){
-		if(IOS.animationFlag){
-			for(var i=0 ; i< this.icons.length; i++){
-				var movebox = this.icons[i];
-				drag({
-						parentNode:IOS.ulMiddle,
-						moveEle: movebox,
-						flag: "icons",
-						mousedownFn : setLisPositionToAbsoulte,
-						mouseupFn : function(evt){
-							reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
-							setLisPositionToNull();
-						}
-					});
-				drag({
-						parentNode:IOS.ulBottom,
-						moveEle: movebox,
-						flag: "icons",
-						mousedownFn : setLisPositionToAbsoulte,
-						mouseupFn : function(evt){
-							reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
-							setLisPositionToNull();
-						}
-					});
-			}
-		}
-	};
+};
 
-	IOS.showHidenElements();
-	IOS.hideShowElements();
-	IOS.removeIcon();
-
+IOS.showHidenElements();
+IOS.hideShowElements();
+IOS.removeIcon();
+//IOS basical function tools --------------------------------------------------------------------3
 function show(){
 	IOS.animationFlag= true;
 	IOS.dragIcons();
-
-	for (var j = 0; j<IOS.removeIconButton.length; j++) {
+	for (var j = 0; j<IOS.icons.length; j++) {
 		var animation= "animated "+" shake"+randomNumber(2)
 		+" roateOrigin"+randomNumber(3);
-		IOS.removeIconButton[j].style.display="block";
 		IOS.icons[j].className= animation;
+		if(IOS.removeIconButton[j]){
+			IOS.removeIconButton[j].style.display="block";		
+		};
 	};
 };
 function hide(){
 	IOS.animationFlag= false;
 	IOS.messageBoxflag = false;
 	IOS.bottomBoxflag = false;
-	for (var j = 0; j<IOS.removeIconButton.length; j++) {
-			IOS.removeIconButton[j].style.display="none";
+	for (var j = 0; j<IOS.icons.length; j++) {			
 			IOS.icons[j].className="";
-		};
-	
-	IOS.topMessage.className = "topMessage transform";
-	
+			if(IOS.removeIconButton[j]){
+			IOS.removeIconButton[j].style.display="none";
+			};
+		};	
+	IOS.topMessage.className = "topMessage transform";	
 	IOS.bottomControl.className="bottomControl transform";
-
 	//IOS.ulMiddle.className ="middle";
-
 };
 function drag(arg) {
 	var parentNode= arg.parentNode ,
@@ -145,17 +151,15 @@ function drag(arg) {
 
 		var	middleX= evt.clientX - leftX,
 			middleY= evt.clientY - topY,
-
 			evtTargetMinLeft = parentNode.offsetLeft -evt.target.offsetLeft,
 			evtTargetMaxLeft = parentNode.offsetWidth -evt.target.offsetWidth-evt.target.offsetLeft,
-
 			evtTargetMinTop = 0-evt.target.offsetTop,
 			evtTargetMaxTop = IOS.section.offsetHeight - movebox.offsetHeight;
 
 		if( middleX >= evtTargetMinLeft && middleX <= evtTargetMaxLeft){
 			movebox.style.left =middleX+"px";
 		};
-		if ( middleY >= evtTargetMinTop && middleY <= evtTargetMaxTop && parentNode == IOS.ulMiddle ) {
+		if ( middleY >= evtTargetMinTop && middleY <= evtTargetMaxTop  ) {
 			movebox.style.top =middleY+"px";
 		}else if(middleY <= -evtTargetMinTop && middleY >= -evtTargetMaxTop && parentNode == IOS.ulBottom){
 			movebox.style.top =middleY+"px";
@@ -164,52 +168,66 @@ function drag(arg) {
 	};
 	function mouseUp(evt) {
 		if(evt.target.className != flag) return;
-		parentNode.removeEventListener("mousemove", mouseMoved, false);		
+		var clientX = parseInt(clientX -IOS.section.offsetLeft),
+			clientY = parseInt(clientY -IOS.section.offsetTop);
+		
 		if( mouseupFn) mouseupFn(evt);
+		parentNode.removeEventListener("mousemove", mouseMoved, false);
 	};
 };
-
+function randomNumber(maxNum){
+	return Math.floor(Math.random()*maxNum+1);
+};
+function nodeAIsDescendantsOfNodeB(nodeA,nodeB){
+	while(nodeA.parentNode){
+		if(nodeA.parentNode == nodeB)
+			return true;
+		nodeA=nodeA.parentNode;
+	}
+	return false;
+};
+//以鼠标的位置定图片的顺序 ----------------------------------------------------------------------4
 function reorderLists(clientX,clientY,targetNode){
 	//console.log("reorder run");
 	IOS.refresh();
-	var clientX =  parseInt(clientX -IOS.section.offsetLeft),
+	var clientX = parseInt(clientX -IOS.section.offsetLeft),
 		clientY = parseInt(clientY -IOS.section.offsetTop),
 		targetNodeWidth = parseInt(IOS.icons[0].offsetWidth),
-		targetNodeHeight = parseInt(IOS.icons[0].offsetHeight);
+		targetNodeHeight = parseInt(IOS.icons[0].offsetHeight),
 
+		currentUl = currentUlMiddle(),	
+		currentUlLi= currentUl.querySelectorAll("li");
 	for(var i=0; i< 4; i++){
 		for(var j=0; j<7 ;j++){
 			if( clientX >= targetNodeWidth*(i-0.5) && clientX < targetNodeWidth*(i+0.5) || clientX >210 ){
-				if( targetNodeHeight*j <=clientY && targetNodeHeight*(j+1) >clientY){
+				if( targetNodeHeight*j <=clientY && targetNodeHeight*(j+1) >clientY ){
 					var evtTargetHoverIndex= j*4 + i ;
 					if(clientX >210) {
 						i =4;
 						evtTargetHoverIndex = evtTargetHoverIndex +i;
 					};
 					//console.log("i="+i+" ,j="+j+" ,evtTargetHoverIndex ="+evtTargetHoverIndex );
-
-					if( clientY>=0 && clientY<360 && IOS.iconsMiddle.length < 24){
-						if(evtTargetHoverIndex > IOS.iconsMiddle.length-1 && evtTargetHoverIndex == 24){
-							IOS.ulMiddle.appendChild(targetNode);
+					if( clientY>=0 && clientY<360 && currentUlLi.length < 24  ){
+						if(evtTargetHoverIndex > currentUlLi.length-1 && evtTargetHoverIndex == 24){
+							currentUl.appendChild(targetNode);
 						}else{
-							IOS.ulMiddle.insertBefore(targetNode,IOS.iconsMiddle[evtTargetHoverIndex]);
-						}							
+							currentUl.insertBefore(targetNode,currentUlLi[evtTargetHoverIndex]);
+						};							
 					};
 					if( clientY >=360  && IOS.iconsBottom.length < 4 ){
 						if(i > IOS.iconsBottom.length-1 ){
 							IOS.ulBottom.appendChild(targetNode);
 						}else{
 							IOS.ulBottom.insertBefore(targetNode,IOS.iconsBottom[i]);
-						}
+						};
 					}
-					styleEqualNull(targetNode);					
+					styleEqualNull(targetNode);	
 					return;
 				};
 			};
 		};
 	};
 };
-//以鼠标的位置定图片的顺序
 function setLisPositionToAbsoulte(){
 	var liCoordinates = [];
 	for(var i=0 ; i<IOS.icons.length; i++){
@@ -229,28 +247,15 @@ function setLisPositionToNull(){
 function styleEqualNull(ele){
 	ele.style = " ";
 };
-function nodeAIsDescendantsOfNodeB(nodeA,nodeB){
-	while(nodeA.parentNode){
-		if(nodeA.parentNode == nodeB)
-			return true;
-		nodeA=nodeA.parentNode;
+function currentUlMiddle(){
+	for (var i = IOS.ulMiddleList.length - 1; i >= 0; i--) {
+		if( IOS.ulMiddleList[i].offsetLeft == 0 )
+			return IOS.ulMiddleList[i];
 	}
-	return false;
 };
-function randomNumber(maxNum){
-	return Math.floor(Math.random()*maxNum+1);
-};
-
-
-
-
-	IOS.touchMovingFuction = function(){
-
-	};
-
-
+//slipe functions ------------------------------------------------------------------------------5
 function mouseMovingDirectionFunction(arg){
-	if(IOS.animationFlag) return;
+	IOS.refresh();
 	var direction, stepX, stepY, clientX, clientY;
 	IOS.startPoint = [0,0],
 	IOS.endPoint = [0,0];
@@ -261,11 +266,13 @@ function mouseMovingDirectionFunction(arg){
 	document.addEventListener("mouseup",orient);
 	
 	function getStart(evt){
+		if( IOS.animationFlag ) return;
 		IOS.startPoint= [evt.clientX, evt.clientY];
 		clientX = IOS.startPoint[0] -IOS.section.offsetLeft;
 		clientY = IOS.startPoint[1] -IOS.section.offsetTop;
 	};
 	function orient(evt){
+		if( IOS.animationFlag ) return;
 		if (0 <= clientX <= 260 && -12<=clientY <=420) {
 			IOS.endPoint= [evt.clientX, evt.clientY];
 			stepX =IOS.endPoint[0]-IOS.startPoint[0];
@@ -283,58 +290,63 @@ function mouseMovingDirectionFunction(arg){
 					arg.slipeTodownFn(evt);
 				};
 			};
-			//document.removeEventListener("mousedown",getStart);
-			//document.removeEventListener("mouseup",orient);
 		};
 	};
 }
 mouseMovingDirectionFunction({
-	slipeToleftFn : function(evt){
-		if( 0 <(IOS.startPoint[0] -IOS.section.offsetLeft) && 
-				(IOS.startPoint[0] -IOS.section.offsetLeft)<= 260 ){
-				var ulMiddleLeft = parseInt(getStyle(IOS.ulMiddle, "left"));
-					IOS.ulMiddle.className ="middle transform ";
-					IOS.ulMiddle.style.left = ulMiddleLeft-260+"px";
-				};
-			},
-	slipeTorightFn : function(evt){
-		if( 0 < (IOS.startPoint[0] -IOS.section.offsetLeft) &&
-			(IOS.startPoint[0] -IOS.section.offsetLeft)<= 260){			
-				var ulMiddleLeft = parseInt(getStyle(IOS.ulMiddle, "left"));
-					IOS.ulMiddle.className ="middle transform ";
-					IOS.ulMiddle.style.left = ulMiddleLeft+260+"px";
-				};
-			},
-	slipeToupFn : function(evt){
-		if( IOS.messageBoxflag ){
-			IOS.topMessage.className = "topMessage transform";
-			IOS.messageBoxflag = false; 
-			return;
-		};
-		if( 400 < (IOS.startPoint[1] -IOS.section.offsetTop) &&
-			(IOS.startPoint[1] -IOS.section.offsetTop)<= 420){
-				//if( IOS.messageBoxflag ) 
-				IOS.bottomControl.className="transform showBottomControl";
-				IOS.bottomBoxflag = true;			
-			};
-		},
-	slipeTodownFn : function(evt){
-		if( IOS.bottomBoxflag ){
-			IOS.bottomControl.className="bottomControl transform";
-			IOS.bottomBoxflag = false;
-			return;
-		};
-		if( -12 <(IOS.startPoint[1] -IOS.section.offsetTop) && 
-			(IOS.startPoint[1] -IOS.section.offsetTop)<= 0 ){
-			//	if( IOS.bottomBoxflag ) return;
-				IOS.topMessage.className="transform showTopMessage";
-				IOS.messageBoxflag = true;
-			};
-		}
+	slipeToleftFn : slipeToleftFn,
+	slipeTorightFn : slipeTorightFn,
+	slipeToupFn : slipeToupFn,
+	slipeTodownFn : slipeTodownFn
 });
-
-console.log(selectors("#bottomBox"))
-
+function slipeToleftFn(evt){
+	if(IOS.ulMiddleList[IOS.ulMiddleList.length-1].offsetLeft <= 0 )return;
+	if( 0 <(IOS.startPoint[0] -IOS.section.offsetLeft) && 
+		(IOS.startPoint[0] -IOS.section.offsetLeft)<= 260 ){
+		for (var i = IOS.ulMiddleList.length - 1; i >= 0; i--) {
+			var ulMiddleLeft = parseInt( getStyle(IOS.ulMiddleList[i], "left") );
+			if(IOS.ulMiddleList[i].className.indexOf("transform") == -1)				
+				IOS.ulMiddleList[i].className +=" transform ";
+			IOS.ulMiddleList[i].style.left = ulMiddleLeft-260+"px";
+		};
+	};
+};
+function slipeTorightFn(evt){
+	if(IOS.ulMiddleList[0].offsetLeft >= 0 )	return;	
+	if( 0 < (IOS.startPoint[0] -IOS.section.offsetLeft) &&
+		(IOS.startPoint[0] -IOS.section.offsetLeft)<= 260){	
+		for (var i = IOS.ulMiddleList.length - 1; i >= 0; i--) {				
+		var ulMiddleLeft = parseInt( getStyle(IOS.ulMiddleList[i], "left") );
+		if(IOS.ulMiddleList[i].className.indexOf("transform") == -1)
+			IOS.ulMiddleList[i].className +=" transform ";
+		IOS.ulMiddleList[i].style.left = ulMiddleLeft+260+"px";
+		};		
+	};
+};
+function slipeToupFn(evt){
+	if( IOS.messageBoxflag ){
+		IOS.topMessage.className = "topMessage transform";
+		IOS.messageBoxflag = false; 
+		return;
+	};
+	if( 400 < (IOS.startPoint[1] -IOS.section.offsetTop) &&
+		(IOS.startPoint[1] -IOS.section.offsetTop)<= 420){
+		IOS.bottomControl.className="transform showBottomControl";
+		IOS.bottomBoxflag = true;			
+	};
+};
+function slipeTodownFn(evt){
+	if( IOS.bottomBoxflag ){
+		IOS.bottomControl.className="bottomControl transform";
+		IOS.bottomBoxflag = false;
+		return;
+	};
+	if( -12 <(IOS.startPoint[1] -IOS.section.offsetTop) && 
+		(IOS.startPoint[1] -IOS.section.offsetTop)<= 0 ){
+		IOS.topMessage.className="transform showTopMessage";
+		IOS.messageBoxflag = true;
+	};
+};
 
 //createUlclassMiddle();
 function createUlclassMiddle(){
