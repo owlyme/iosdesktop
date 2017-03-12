@@ -347,6 +347,10 @@ function slipeTodownFn(evt){
 		IOS.messageBoxflag = true;
 	};
 };
+//IOS draging in ulMiddleList block -----------------------------------------------------------6
+//IOS draging and creating new ulMiddleList----------------------------------------------------7
+
+
 
 //createUlclassMiddle();
 function createUlclassMiddle(){
