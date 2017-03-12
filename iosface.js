@@ -25,6 +25,7 @@ function(){
 
 		ulMiddle: selectors("ul.middle")[0],
 		ulMiddleList: selectors("section ul.middle"),
+		ulArray : [],
 		iconsMiddle: selectors("ul.middle li"),
 
 		topMessage:selectors('.topMessage')[0],
@@ -34,6 +35,7 @@ function(){
 		iconsBottom: selectors("ul.bottom li"),
 
 		removeIconButton: selectors('.close'),
+		indicatorLights :  selectors('footer h5 span'),
 		refresh : function(){
 			this.icons = selectors("section ul li");
 			this.removeIconButton= selectors('section ul li div');
@@ -59,7 +61,13 @@ IOS.removeIcon = function(){
 	for (var j = 0; j<IOS.removeIconButton.length; j++) {
 		IOS.removeIconButton[j].addEventListener('mousedown',function(event){
 			event.stopPropagation();
-			event.target.parentNode.parentNode.parentNode.removeChild(event.target.parentNode.parentNode);
+			var targetElement = event.target,
+				divElement = targetElement.parentNode,
+				liElement = targetElement.parentNode.parentNode,
+				ulElement = targetElement.parentNode.parentNode.parentNode;
+				liElement.className = "transitionZoomIn"; 
+			//ulElement.removeChild(event.target.parentNode.parentNode);
+			var zoomIn = setTimeout(function(){ulElement.removeChild(liElement)	},500);
 			IOS.refresh();
 		});
 	};
@@ -118,12 +126,12 @@ function hide(){
 	for (var j = 0; j<IOS.icons.length; j++) {			
 			IOS.icons[j].className="";
 			if(IOS.removeIconButton[j]){
-			IOS.removeIconButton[j].style.display="none";
+			IOS.removeIconButton[j].style.display="none";			    
 			};
-		};	
+		};
+
 	IOS.topMessage.className = "topMessage transform";	
 	IOS.bottomControl.className="bottomControl transform";
-	//IOS.ulMiddle.className ="middle";
 };
 function drag(arg) {
 	var parentNode= arg.parentNode ,
@@ -253,6 +261,9 @@ function currentUlMiddle(){
 			return IOS.ulMiddleList[i];
 	}
 };
+
+
+
 //slipe functions ------------------------------------------------------------------------------5
 function mouseMovingDirectionFunction(arg){
 	IOS.refresh();
@@ -294,12 +305,19 @@ function mouseMovingDirectionFunction(arg){
 	};
 }
 mouseMovingDirectionFunction({
-	slipeToleftFn : slipeToleftFn,
-	slipeTorightFn : slipeTorightFn,
+	slipeToleftFn : function(){
+					slipeToleftFn();
+					var delay = setTimeout(indicatorLight , 400);
+					},
+	slipeTorightFn :function(){
+					slipeTorightFn();
+					//indicatorLight();
+					var delay = setTimeout(indicatorLight , 400);
+					},
 	slipeToupFn : slipeToupFn,
 	slipeTodownFn : slipeTodownFn
 });
-function slipeToleftFn(evt){
+function slipeToleftFn(evt){	
 	if(IOS.ulMiddleList[IOS.ulMiddleList.length-1].offsetLeft <= 0 )return;
 	if( 0 <(IOS.startPoint[0] -IOS.section.offsetLeft) && 
 		(IOS.startPoint[0] -IOS.section.offsetLeft)<= 260 ){
@@ -312,15 +330,16 @@ function slipeToleftFn(evt){
 	};
 };
 function slipeTorightFn(evt){
-	if(IOS.ulMiddleList[0].offsetLeft >= 0 )	return;	
+	if(IOS.ulMiddleList[0].offsetLeft >= 0 )	return;
 	if( 0 < (IOS.startPoint[0] -IOS.section.offsetLeft) &&
 		(IOS.startPoint[0] -IOS.section.offsetLeft)<= 260){	
 		for (var i = IOS.ulMiddleList.length - 1; i >= 0; i--) {				
-		var ulMiddleLeft = parseInt( getStyle(IOS.ulMiddleList[i], "left") );
-		if(IOS.ulMiddleList[i].className.indexOf("transform") == -1)
-			IOS.ulMiddleList[i].className +=" transform ";
-		IOS.ulMiddleList[i].style.left = ulMiddleLeft+260+"px";
-		};		
+			var ulMiddleLeft = parseInt( getStyle(IOS.ulMiddleList[i], "left") );
+			if(IOS.ulMiddleList[i].className.indexOf("transform") == -1)
+				IOS.ulMiddleList[i].className +=" transform ";
+			IOS.ulMiddleList[i].style.left = ulMiddleLeft+260+"px";
+			
+		};
 	};
 };
 function slipeToupFn(evt){
@@ -347,8 +366,26 @@ function slipeTodownFn(evt){
 		IOS.messageBoxflag = true;
 	};
 };
+// 指示灯
+function indicatorLight(){
+	for (var i = IOS.indicatorLights.length - 1; i >= 0; i--) {
+		if( IOS.ulMiddleList[i].offsetLeft == 0 ){
+			IOS.indicatorLights[i].style.color = "#fff";
+		}else {
+			IOS.indicatorLights[i].style.color = "#777";
+		}
+	}
+}
 //IOS draging in ulMiddleList block -----------------------------------------------------------6
 //IOS draging and creating new ulMiddleList----------------------------------------------------7
+
+//
+function ulList(){
+
+}
+
+
+
 
 
 
@@ -359,11 +396,21 @@ function createUlclassMiddle(){
 		ul.style.left = "260px";
 	IOS.section.appendChild(ul);
 };
-//createUlclassMiddleInnerHTML()
-function createUlclassMiddleInnerHTML(){
-	var newUlMiddle='<ul class="middle"> <ul>';
-	IOS.section.innerHTML += newUlMiddle;
+
+function createUlclassMiddleInnerHTML(arguments){
+	var newUlMiddle='<ul class="middle">';
+	for (var i = arguments.length- 1; i >= 0; i--) {
+		newUlMiddle += '<li>';
+		newUlMiddle += '<div class="icons">';
+		if( !arguments[i][1] ) newUlMiddle += '<div class="close">x</div>';
+		newUlMiddle += '<h6>';
+		newUlMiddle += arguments[i][0];
+		newUlMiddle += '</h6>';
+		newUlMiddle += '</li>';
+	}
+	return newUlMiddle += '</ul>';	
 }
+
 
 
 

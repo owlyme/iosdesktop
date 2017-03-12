@@ -21,7 +21,7 @@ header,nav ,section , footer{
 header, footer{
 	background: #fff;
 }
-header {
+header {margin-top: 60px;
 	height: 50px;	
 	border-radius:  40px 40px 0  0;
 	border-bottom: none;
@@ -99,7 +99,7 @@ section ul li{
 	float: left;
 	width: 60px;
 	height: 60px;
-	padding: 12.5px;
+	padding: 10px;
 }
 footer h5{
 	position: absolute;
@@ -111,8 +111,8 @@ footer h5{
 }
 .icons{
 	position: relative;
-	width: 35px;
-	height: 35px;
+	width: 40px;
+	height: 40px;
 	background: #12aeef;
 	border-radius: 10px;
 }
@@ -167,7 +167,19 @@ footer button{
 	outline: none;
 	cursor: pointer;
 }
-
+.transitionZoomIn{
+	display: inline-block;
+	line-height: 0;
+	height: 0;
+	width: 0;
+	padding: 0;
+	opacity: 0;
+	overflow: hidden;
+	border-radius: 10px;
+	transition:height 0.5s,width 0.5s ,padding 0.5s,opacity 0.4s;
+	-moz-transition:height 0.5s,width 0.5s,padding 0.5s,opacity 0.4s, -moz-transform .4s; /* Firefox 4 */
+	-webkit-transition:height 0.5s,width 0.5s,padding 0.5s,opacity 0.4s, -webkit-transform .4s; /* Safari and Chrome */
+}
 .topMessage{
 	position: absolute;
 	top: 0px;
