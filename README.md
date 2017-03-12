@@ -1,2 +1,2 @@
 # owlyme.github.io
-first time, just for test, some files don't need!
+This is my first test project. Some files are redundant or un-necessary
