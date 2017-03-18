@@ -7,25 +7,30 @@ function(){
 			return document.querySelectorAll(nodeName);
 		}
 	};
+	
 
 	selectors("nav span.center")[0].innerText= (new Date()).toString().substring(16,21);
 	var CLOCK = setInterval(function(){
 			selectors("nav span.center")[0].innerText= (new Date()).toString().substring(16,21);
 		},1000);
+
+
 //IOS Object ------------------------------------------------------------------------------------1
 	var IOS={
 		activingFlag : false,
 		animationFlag: false,	
 		messageBoxflag : false,
 		bottomBoxflag : false,
+		currentUlIndex : 1,
 
+		mouseInIOScoordinate: [0,0],
 		section:selectors("section")[0],
 
 		icons: selectors("section ul li"),
-
+		middleIcons : selectors("section ul.middle li"),
+		bottomIcons : selectors("section ul.bottom li"),
 		ulMiddle: selectors("ul.middle")[0],
 		ulMiddleList: selectors("section ul.middle"),
-		ulArray : [],
 		iconsMiddle: selectors("ul.middle li"),
 
 		topMessage:selectors('.topMessage')[0],
@@ -42,8 +47,23 @@ function(){
 			this.iconsMiddle= selectors("ul.middle li");
 			this.iconsBottom= selectors("ul.bottom li");
 			this.removeIconButton= selectors('.close');
+			this.ulMiddleList= selectors("section ul.middle");
+			this.middleIcons = selectors("section ul.middle li");
+			this.buttonIcons = selectors("section ul.bottom li");
 		}
 	};
+//IOS textSelectedForbidden function ------------------------------------------------------------1-1
+//textSelectedForbidden();
+function textSelectedForbidden(){
+		if (typeof(IOS.section.onselectstart) != "undefined") {        
+		    // IE下禁止元素被选取        
+		    IOS.section.onselectstart = new Function("return false");
+		} else {
+		    // firefox下禁止元素被选取的变通办法
+			IOS.section.onmousedown = new Function("return false");        
+			IOS.section.onmouseup = new Function("return true");
+		}	
+};
 //IOS functions ---------------------------------------------------------------------------------2
 IOS.showHidenElements = function(){
 	for(var i=0 ; i< this.icons.length; i++){
@@ -54,7 +74,7 @@ IOS.showHidenElements = function(){
 		});
 	};
 };
-IOS.hideShowElements =function(){			
+IOS.hideShowElements =function(){
 	selectors("button")[0].addEventListener('mousedown',hide);
 };
 IOS.removeIcon = function(){
@@ -71,32 +91,60 @@ IOS.removeIcon = function(){
 			IOS.refresh();
 		});
 	};
-};
+};/*
 IOS.dragIcons = function(){
+	IOS.refresh();
 	if(IOS.animationFlag){		
-	for(var i=0 ; i< IOS.icons.length; i++){
-		var movebox = IOS.icons[i];
+	for(var i=0 ; i< IOS.middleIcons.length; i++){
+		var movebox = IOS.middleIcons[i];
 		for (var k = IOS.ulMiddleList.length - 1; k >= 0; k--) {
 			(function(i){
-				drag({
+				drag1({
 					parentNode:IOS.ulMiddleList[k],
 					moveEle: i,
 					flag: "icons",
 					mousedownFn : setLisPositionToAbsoulte,
+					mousemoveFn : function(evt){create_new_ulMiddle_or_move_to_neighbour_ulMiddle(evt)},
 					mouseupFn : function(evt){
 						reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
 						setLisPositionToNull();
+						removeUlclassMiddle();
+						setUlBottomliToCenter();
 					}
 			})})(movebox);
 		};
-		drag({
+	};
+	for(var i=0 ; i< IOS.bottomIcons.length; i++){
+		drag1({
 			parentNode:IOS.ulBottom,
-			moveEle: movebox,
+			moveEle: IOS.bottomIcons[i],
 			flag: "icons",
 			mousedownFn : setLisPositionToAbsoulte,
 			mouseupFn : function(evt){
 				reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
 				setLisPositionToNull();
+				setUlBottomliToCenter();
+				}
+			});
+		};
+	};
+};*/
+IOS.dragIcons = function(){
+	IOS.refresh();
+	if(IOS.animationFlag){		
+		for(var i=0 ; i< IOS.icons.length; i++){
+			var movebox = IOS.icons[i];
+			console.log(movebox)
+				drag1({					
+				moveEle: movebox,
+				flag: "icons",
+				mousedownFn : setLisPositionToAbsoulte,
+				mousemoveFn : function(evt){create_new_ulMiddle_or_move_to_neighbour_ulMiddle(evt)},
+				mouseupFn : function(evt){
+					reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
+					setLisPositionToNull();
+					removeUlclassMiddle();
+					setUlBottomliToCenter();
 				}
 			});
 		};
@@ -109,7 +157,9 @@ IOS.removeIcon();
 //IOS basical function tools --------------------------------------------------------------------3
 function show(){
 	IOS.animationFlag= true;
-	IOS.dragIcons();
+	if(IOS.animationFlag){
+		IOS.dragIcons();		
+	}	
 	for (var j = 0; j<IOS.icons.length; j++) {
 		var animation= "animated "+" shake"+randomNumber(2)
 		+" roateOrigin"+randomNumber(3);
@@ -132,9 +182,10 @@ function hide(){
 
 	IOS.topMessage.className = "topMessage transform";	
 	IOS.bottomControl.className="bottomControl transform";
+	//clearInterval(IOS.foo )
 };
 function drag(arg) {
-	var parentNode= arg.parentNode ,
+	var parentNode= arg.parentNode,
 		movebox = arg.moveEle,
 		flag = arg.flag,
 		mousedownFn= arg.mousedownFn,
@@ -147,9 +198,19 @@ function drag(arg) {
     function mouseDown(evt) {
     	if(evt.target.className != flag) return;
     	leftX= evt.clientX- movebox.offsetLeft, 
-		topY=evt.clientY-movebox.offsetTop;
-		parentNode.addEventListener("mousemove", mouseMoved, false);		
+		topY= evt.clientY-movebox.offsetTop;
+		IOS.section.addEventListener("mousemove", mouseMoved, false);		
 		if( mousedownFn) mousedownFn(evt);
+			IOS.section.appendChild(evt.target.parentNode);
+			
+			var leftInSection = evt.target.parentNode.offsetLeft,
+				topInSection = evt.target.parentNode.offsetTop;		
+				movebox.style.left = leftInSection+3+"px";
+			if( parentNode != IOS.ulBottom) {
+				movebox.style.top = topInSection+3+"px";
+			}else if ( parentNode == IOS.ulBottom){
+				//movebox.style.top = topInSection+360+"px";
+			};
 	}
 	function mouseMoved(evt) {
 		evt.preventDefault();
@@ -161,14 +222,18 @@ function drag(arg) {
 			middleY= evt.clientY - topY,
 			evtTargetMinLeft = parentNode.offsetLeft -evt.target.offsetLeft,
 			evtTargetMaxLeft = parentNode.offsetWidth -evt.target.offsetWidth-evt.target.offsetLeft,
+			
+			//evtTargetMinLeft = IOS.section.offsetLeft -evt.target.offsetLeft,
+			//evtTargetMaxLeft = IOS.section.offsetWidth -evt.target.offsetWidth-evt.target.offsetLeft,
 			evtTargetMinTop = 0-evt.target.offsetTop,
 			evtTargetMaxTop = IOS.section.offsetHeight - movebox.offsetHeight;
-
-		if( middleX >= evtTargetMinLeft && middleX <= evtTargetMaxLeft){
+			
+		IOS.mouseInIOScoordinate=[middleX,middleY];
+		if( middleX >= evtTargetMinLeft && middleX <= evtTargetMaxLeft){ 
 			movebox.style.left =middleX+"px";
 		};
-		if ( middleY >= evtTargetMinTop && middleY <= evtTargetMaxTop  ) {
-			movebox.style.top =middleY+"px";
+		if( middleY >= evtTargetMinTop && middleY <= evtTargetMaxTop  ) {
+			movebox.style.top =middleY+10+"px";
 		}else if(middleY <= -evtTargetMinTop && middleY >= -evtTargetMaxTop && parentNode == IOS.ulBottom){
 			movebox.style.top =middleY+"px";
 		};
@@ -177,11 +242,69 @@ function drag(arg) {
 	function mouseUp(evt) {
 		if(evt.target.className != flag) return;
 		var clientX = parseInt(clientX -IOS.section.offsetLeft),
-			clientY = parseInt(clientY -IOS.section.offsetTop);
-		
+			clientY = parseInt(clientY -IOS.section.offsetTop);		
 		if( mouseupFn) mouseupFn(evt);
-		parentNode.removeEventListener("mousemove", mouseMoved, false);
+		IOS.section.removeEventListener("mousemove", mouseMoved, false);
 	};
+};
+function drag1(arg) {
+	IOS.refresh();
+	var parentNode= arg.parentNode,
+		movebox = arg.moveEle,
+		flag = arg.flag,
+		mousedownFn= arg.mousedownFn,
+		mousemoveFn=arg.mousemoveFn,
+		mouseupFn =arg.mouseupFn;
+    var leftX=0, topY=0,sectionTopY,sectionLeftX;
+   	
+   
+
+
+	movebox.addEventListener("mousedown", mouseDown, false);
+	movebox.addEventListener("mouseup", mouseUp, false);
+
+    function mouseDown(evt) {
+    	if(evt.target.className != flag) return;
+    	sectionLeftX = evt.clientX-movebox.offsetLeft,
+		sectionTopY = evt.clientY-movebox.offsetTop;		
+		IOS.section.addEventListener("mousemove", mouseMoved, false);		
+		if( mousedownFn) mousedownFn(evt);
+	}
+
+	function mouseMoved(evt) {	
+		IOS.refresh();
+		targetElement = evt.target;
+		if(!IOS.animationFlag) return;
+		evt.preventDefault();		
+		if( movebox.parentNode == IOS.ulBottom ){
+		 	sectionTopY =sectionTopY-IOS.section.offsetHeight+IOS.ulBottom.offsetHeight;
+		 	firstMouseMovingAction = false;
+		 }
+		IOS.section.appendChild(movebox);	
+		movebox.style.position= "absolute";
+		movebox.style.zIndex= 1;
+		var	middleX= evt.clientX - sectionLeftX,
+			middleY= evt.clientY - sectionTopY;				
+		IOS.mouseInIOScoordinate=[middleX,middleY];
+		
+		if( middleX >=-10 && middleX <= 210){ 
+			movebox.style.left =middleX+"px";
+		};
+		if(middleY >= 0 && middleY <= 360 ) {			 
+			movebox.style.top =middleY+"px";
+		}else if ( middleY >  360 ){
+			movebox.style.top =360+"px";
+		}
+		if( mousemoveFn) mousemoveFn(evt);
+
+	};
+	function mouseUp(evt) {
+		if(evt.target.className != flag) return;
+		var clientX = parseInt(sectionLeftX -IOS.section.offsetLeft),
+			clientY = parseInt(sectionTopY -IOS.section.offsetTop);		
+		if( mouseupFn) mouseupFn(evt);
+		IOS.section.removeEventListener("mousemove", mouseMoved, false);
+	};	
 };
 function randomNumber(maxNum){
 	return Math.floor(Math.random()*maxNum+1);
@@ -196,14 +319,12 @@ function nodeAIsDescendantsOfNodeB(nodeA,nodeB){
 };
 //以鼠标的位置定图片的顺序 ----------------------------------------------------------------------4
 function reorderLists(clientX,clientY,targetNode){
-	//console.log("reorder run");
 	IOS.refresh();
 	var clientX = parseInt(clientX -IOS.section.offsetLeft),
 		clientY = parseInt(clientY -IOS.section.offsetTop),
 		targetNodeWidth = parseInt(IOS.icons[0].offsetWidth),
 		targetNodeHeight = parseInt(IOS.icons[0].offsetHeight),
-
-		currentUl = currentUlMiddle(),	
+		currentUl = currentUlMiddle().element,	
 		currentUlLi= currentUl.querySelectorAll("li");
 	for(var i=0; i< 4; i++){
 		for(var j=0; j<7 ;j++){
@@ -214,7 +335,6 @@ function reorderLists(clientX,clientY,targetNode){
 						i =4;
 						evtTargetHoverIndex = evtTargetHoverIndex +i;
 					};
-					//console.log("i="+i+" ,j="+j+" ,evtTargetHoverIndex ="+evtTargetHoverIndex );
 					if( clientY>=0 && clientY<360 && currentUlLi.length < 24  ){
 						if(evtTargetHoverIndex > currentUlLi.length-1 && evtTargetHoverIndex == 24){
 							currentUl.appendChild(targetNode);
@@ -230,11 +350,11 @@ function reorderLists(clientX,clientY,targetNode){
 						};
 					}
 					styleEqualNull(targetNode);	
-					return;
+					return ;
 				};
 			};
 		};
-	};
+	};	
 };
 function setLisPositionToAbsoulte(){
 	var liCoordinates = [];
@@ -256,45 +376,47 @@ function styleEqualNull(ele){
 	ele.style = " ";
 };
 function currentUlMiddle(){
+	IOS.ulMiddleList=selectors("section ul.middle");
 	for (var i = IOS.ulMiddleList.length - 1; i >= 0; i--) {
 		if( IOS.ulMiddleList[i].offsetLeft == 0 )
-			return IOS.ulMiddleList[i];
-	}
+			return 	{element: IOS.ulMiddleList[i],
+						index : i}
+	};
+	return false;
 };
-
-
-
 //slipe functions ------------------------------------------------------------------------------5
 function mouseMovingDirectionFunction(arg){
 	IOS.refresh();
-	var direction, stepX, stepY, clientX, clientY;
+	var direction, stepX, stepY, clientX, clientY,targetElement;
 	IOS.startPoint = [0,0],
 	IOS.endPoint = [0,0];
-	document.addEventListener("mousedown",getStart);
-	document.addEventListener("mousemove",function(evt){
+	IOS.section.addEventListener("mousedown",getStart);
+	IOS.section.addEventListener("mousemove",function(evt){
 		evt.preventDefault();
 	})
-	document.addEventListener("mouseup",orient);
+	IOS.section.addEventListener("mouseup",orient);
 	
 	function getStart(evt){
-		if( IOS.animationFlag ) return;
+		evt.preventDefault();
 		IOS.startPoint= [evt.clientX, evt.clientY];
 		clientX = IOS.startPoint[0] -IOS.section.offsetLeft;
 		clientY = IOS.startPoint[1] -IOS.section.offsetTop;
 	};
+	
 	function orient(evt){
-		if( IOS.animationFlag ) return;
 		if (0 <= clientX <= 260 && -12<=clientY <=420) {
 			IOS.endPoint= [evt.clientX, evt.clientY];
 			stepX =IOS.endPoint[0]-IOS.startPoint[0];
 			stepY =IOS.endPoint[1]-IOS.startPoint[1];
-			if( Math.abs(stepX) > Math.abs(stepY) && Math.abs(stepX) >20){
-				if(stepX >0 && arg.slipeTorightFn){
-					arg.slipeTorightFn(evt);
-				}else if( stepX <0 && arg.slipeToleftFn ){
-					arg.slipeToleftFn(evt);
+			if( Math.abs(stepX) > Math.abs(stepY) && Math.abs(stepX) >20 ){
+				if(!IOS.animationFlag || evt.target.className != "icons"){
+					if(stepX >0 && arg.slipeTorightFn){
+						arg.slipeTorightFn(evt);
+					}else if( stepX <0 && arg.slipeToleftFn ){
+						arg.slipeToleftFn(evt);
+					};
 				};
-			}else if( Math.abs(stepX) <= Math.abs(stepY) && Math.abs(stepY) >20 ){
+			}else if( Math.abs(stepX) <= Math.abs(stepY) && Math.abs(stepY) >20 && !IOS.animationFlag ){
 				if( stepY <0 && arg.slipeToupFn){
 					arg.slipeToupFn(evt);
 				}else if(  stepY >0 && arg.slipeTodownFn ){
@@ -303,44 +425,48 @@ function mouseMovingDirectionFunction(arg){
 			};
 		};
 	};
-}
+};
+(function(){
+	IOS.indicatorLights[1].style.color = "#fff";
+	for (var i = IOS.ulMiddleList.length - 1; i >= 0; i--) {	
+		IOS.ulMiddleList[i].className +=" transform ";
+	};		
+})();
 mouseMovingDirectionFunction({
-	slipeToleftFn : function(){
-					slipeToleftFn();
-					var delay = setTimeout(indicatorLight , 400);
+	slipeToleftFn : function(evt){
+					slipeToleftFn(evt);
+					
 					},
-	slipeTorightFn :function(){
+	slipeTorightFn :function(evt){
 					slipeTorightFn();
 					//indicatorLight();
-					var delay = setTimeout(indicatorLight , 400);
 					},
 	slipeToupFn : slipeToupFn,
 	slipeTodownFn : slipeTodownFn
 });
-function slipeToleftFn(evt){	
+function slipeToleftFn(evt){
 	if(IOS.ulMiddleList[IOS.ulMiddleList.length-1].offsetLeft <= 0 )return;
 	if( 0 <(IOS.startPoint[0] -IOS.section.offsetLeft) && 
-		(IOS.startPoint[0] -IOS.section.offsetLeft)<= 260 ){
-		for (var i = IOS.ulMiddleList.length - 1; i >= 0; i--) {
-			var ulMiddleLeft = parseInt( getStyle(IOS.ulMiddleList[i], "left") );
-			if(IOS.ulMiddleList[i].className.indexOf("transform") == -1)				
-				IOS.ulMiddleList[i].className +=" transform ";
-			IOS.ulMiddleList[i].style.left = ulMiddleLeft-260+"px";
-		};
+		(IOS.startPoint[0] -IOS.section.offsetLeft)<= 260 ){	
+		var index = currentUlMiddle().index;
+		if (index < IOS.ulMiddleList.length-1){
+			IOS.ulMiddleList[index].style.left = -260+"px";
+			IOS.ulMiddleList[index+1].style.left = 0+"px";
+		};		
 	};
+	var delay = setTimeout(indicatorLight , 500);
 };
 function slipeTorightFn(evt){
 	if(IOS.ulMiddleList[0].offsetLeft >= 0 )	return;
 	if( 0 < (IOS.startPoint[0] -IOS.section.offsetLeft) &&
 		(IOS.startPoint[0] -IOS.section.offsetLeft)<= 260){	
-		for (var i = IOS.ulMiddleList.length - 1; i >= 0; i--) {				
-			var ulMiddleLeft = parseInt( getStyle(IOS.ulMiddleList[i], "left") );
-			if(IOS.ulMiddleList[i].className.indexOf("transform") == -1)
-				IOS.ulMiddleList[i].className +=" transform ";
-			IOS.ulMiddleList[i].style.left = ulMiddleLeft+260+"px";
-			
-		};
+		var index = currentUlMiddle().index;
+		if (index > 0 ){
+		 	IOS.ulMiddleList[index-1].style.left = 0+"px";
+		 	IOS.ulMiddleList[index].style.left = 260+"px";
+		 };
 	};
+	var delay = setTimeout(indicatorLight , 500);
 };
 function slipeToupFn(evt){
 	if( IOS.messageBoxflag ){
@@ -368,8 +494,10 @@ function slipeTodownFn(evt){
 };
 // 指示灯
 function indicatorLight(){
+	IOS.indicatorLights = selectors("footer h5 span");
 	for (var i = IOS.indicatorLights.length - 1; i >= 0; i--) {
 		if( IOS.ulMiddleList[i].offsetLeft == 0 ){
+			console.log("aaa")
 			IOS.indicatorLights[i].style.color = "#fff";
 		}else {
 			IOS.indicatorLights[i].style.color = "#777";
@@ -377,25 +505,78 @@ function indicatorLight(){
 	}
 }
 //IOS draging in ulMiddleList block -----------------------------------------------------------6
+function create_new_ulMiddle_or_move_to_neighbour_ulMiddle(evt){	
+	if (!currentUlMiddle() ) return;
+	if( IOS.mouseInIOScoordinate[1] > 360) return ;
+	var index1 = currentUlMiddle().index,		
+		clientX = IOS.mouseInIOScoordinate[0],
+		childrenNum = IOS.ulMiddleList[index1].children.length ;		
+	if(clientX >= 230 ){
+		if (index1 == IOS.ulMiddleList.length-1 && childrenNum){
+			createUlclassMiddle(index1);
+			var delay = setTimeout(slipeToleftFn, 5);
+			return;
+		}
+		slipeToleftFn();
+	};
+	if(clientX <= 10 ){
+		if (index1 == 0  && childrenNum){
+			createUlclassMiddle(index1);
+			var delay = setTimeout(slipeTorightFn, 5);
+			return;
+		}
+		slipeTorightFn();
+	};
+	//currentUlMiddle().element.appendChild(evt.target.parentNode);
+};
 //IOS draging and creating new ulMiddleList----------------------------------------------------7
-
-//
-function ulList(){
-
-}
-
-
-
-
 
 
 //createUlclassMiddle();
-function createUlclassMiddle(){
+function createUlclassMiddle(value){
 	var ul = document.createElement("UL");
-		ul.className= "middle";
+		ul.className= "middle transform";
+	if(value >0){
 		ul.style.left = "260px";
-	IOS.section.appendChild(ul);
+		IOS.section.insertBefore(ul,IOS.ulBottom);
+		IOS.indicatorLights[0].parentNode.innerHTML +="<span>o</span>";
+	} ;
+	if(value == 0) {
+		ul.style.left = "-260px";
+		IOS.indicatorLights[0].parentNode.innerHTML +="<span>o</span>";
+		IOS.section.insertBefore(ul,IOS.ulMiddleList[0]);
+	};
 };
+function removeUlclassMiddle(){
+	for (var i = IOS.ulMiddleList.length - 1; i >= 0; i--) {
+		if( IOS.ulMiddleList[i].children.length == 0 ){
+			IOS.section.removeChild(IOS.ulMiddleList[i]);
+			IOS.indicatorLights[0].parentNode.removeChild(IOS.indicatorLights[i]);
+		}
+	};
+};
+//set ulBottom's li's postion to center ------------------------------------------------------8
+function setUlBottomliToCenter(){
+	IOS.refresh();
+	switch(IOS.iconsBottom.length ) {
+		case 4 :
+		IOS.ulBottom.style.paddingLeft= "10px";
+		break;
+		case 3 :
+		IOS.ulBottom.style.paddingLeft= "40px";
+		break;
+		case 2 :
+		IOS.ulBottom.style.paddingLeft= "70px";
+		break;
+		case 1 :
+		IOS.ulBottom.style.paddingLeft= "100px";
+		break;
+		default:
+		break;
+	};
+};
+setUlBottomliToCenter();
+
 
 function createUlclassMiddleInnerHTML(arguments){
 	var newUlMiddle='<ul class="middle">';
@@ -427,5 +608,8 @@ function getStyle(element, attr) {
 	}
 	return value;
 }
+
+
+
 
 })
