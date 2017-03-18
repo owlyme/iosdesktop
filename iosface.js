@@ -7,16 +7,12 @@ function(){
 			return document.querySelectorAll(nodeName);
 		}
 	};
-	
-
 	selectors("nav span.center")[0].innerText= (new Date()).toString().substring(16,21);
 	var CLOCK = setInterval(function(){
 			selectors("nav span.center")[0].innerText= (new Date()).toString().substring(16,21);
 		},1000);
-
-
 //IOS Object ------------------------------------------------------------------------------------1
-	var IOS={
+var IOS={
 		activingFlag : false,
 		animationFlag: false,	
 		messageBoxflag : false,
@@ -51,18 +47,6 @@ function(){
 			this.middleIcons = selectors("section ul.middle li");
 			this.buttonIcons = selectors("section ul.bottom li");
 		}
-	};
-//IOS textSelectedForbidden function ------------------------------------------------------------1-1
-//textSelectedForbidden();
-function textSelectedForbidden(){
-		if (typeof(IOS.section.onselectstart) != "undefined") {        
-		    // IE下禁止元素被选取        
-		    IOS.section.onselectstart = new Function("return false");
-		} else {
-		    // firefox下禁止元素被选取的变通办法
-			IOS.section.onmousedown = new Function("return false");        
-			IOS.section.onmouseup = new Function("return true");
-		}	
 };
 //IOS functions ---------------------------------------------------------------------------------2
 IOS.showHidenElements = function(){
@@ -86,56 +70,18 @@ IOS.removeIcon = function(){
 				liElement = targetElement.parentNode.parentNode,
 				ulElement = targetElement.parentNode.parentNode.parentNode;
 				liElement.className = "transitionZoomIn"; 
-			//ulElement.removeChild(event.target.parentNode.parentNode);
 			var zoomIn = setTimeout(function(){ulElement.removeChild(liElement)	},500);
 			IOS.refresh();
 		});
 	};
-};/*
-IOS.dragIcons = function(){
-	IOS.refresh();
-	if(IOS.animationFlag){		
-	for(var i=0 ; i< IOS.middleIcons.length; i++){
-		var movebox = IOS.middleIcons[i];
-		for (var k = IOS.ulMiddleList.length - 1; k >= 0; k--) {
-			(function(i){
-				drag1({
-					parentNode:IOS.ulMiddleList[k],
-					moveEle: i,
-					flag: "icons",
-					mousedownFn : setLisPositionToAbsoulte,
-					mousemoveFn : function(evt){create_new_ulMiddle_or_move_to_neighbour_ulMiddle(evt)},
-					mouseupFn : function(evt){
-						reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
-						setLisPositionToNull();
-						removeUlclassMiddle();
-						setUlBottomliToCenter();
-					}
-			})})(movebox);
-		};
-	};
-	for(var i=0 ; i< IOS.bottomIcons.length; i++){
-		drag1({
-			parentNode:IOS.ulBottom,
-			moveEle: IOS.bottomIcons[i],
-			flag: "icons",
-			mousedownFn : setLisPositionToAbsoulte,
-			mouseupFn : function(evt){
-				reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
-				setLisPositionToNull();
-				setUlBottomliToCenter();
-				}
-			});
-		};
-	};
-};*/
+};
 IOS.dragIcons = function(){
 	IOS.refresh();
 	if(IOS.animationFlag){		
 		for(var i=0 ; i< IOS.icons.length; i++){
 			var movebox = IOS.icons[i];
-			console.log(movebox)
-				drag1({					
+				drag({	
+				parentNode : IOS.section,			
 				moveEle: movebox,
 				flag: "icons",
 				mousedownFn : setLisPositionToAbsoulte,
@@ -185,80 +131,18 @@ function hide(){
 	//clearInterval(IOS.foo )
 };
 function drag(arg) {
-	var parentNode= arg.parentNode,
-		movebox = arg.moveEle,
-		flag = arg.flag,
-		mousedownFn= arg.mousedownFn,
-		mousemoveFn=arg.mousemoveFn,
-		mouseupFn =arg.mouseupFn;
-    var leftX=0, topY=0;
-
-	movebox.addEventListener("mousedown", mouseDown, false);
-	movebox.addEventListener("mouseup", mouseUp, false);
-    function mouseDown(evt) {
-    	if(evt.target.className != flag) return;
-    	leftX= evt.clientX- movebox.offsetLeft, 
-		topY= evt.clientY-movebox.offsetTop;
-		IOS.section.addEventListener("mousemove", mouseMoved, false);		
-		if( mousedownFn) mousedownFn(evt);
-			IOS.section.appendChild(evt.target.parentNode);
-			
-			var leftInSection = evt.target.parentNode.offsetLeft,
-				topInSection = evt.target.parentNode.offsetTop;		
-				movebox.style.left = leftInSection+3+"px";
-			if( parentNode != IOS.ulBottom) {
-				movebox.style.top = topInSection+3+"px";
-			}else if ( parentNode == IOS.ulBottom){
-				//movebox.style.top = topInSection+360+"px";
-			};
-	}
-	function mouseMoved(evt) {
-		evt.preventDefault();
-		if(!IOS.animationFlag) return;
-		movebox.style.position= "absolute";
-		movebox.style.zIndex= 1;
-
-		var	middleX= evt.clientX - leftX,
-			middleY= evt.clientY - topY,
-			evtTargetMinLeft = parentNode.offsetLeft -evt.target.offsetLeft,
-			evtTargetMaxLeft = parentNode.offsetWidth -evt.target.offsetWidth-evt.target.offsetLeft,
-			
-			//evtTargetMinLeft = IOS.section.offsetLeft -evt.target.offsetLeft,
-			//evtTargetMaxLeft = IOS.section.offsetWidth -evt.target.offsetWidth-evt.target.offsetLeft,
-			evtTargetMinTop = 0-evt.target.offsetTop,
-			evtTargetMaxTop = IOS.section.offsetHeight - movebox.offsetHeight;
-			
-		IOS.mouseInIOScoordinate=[middleX,middleY];
-		if( middleX >= evtTargetMinLeft && middleX <= evtTargetMaxLeft){ 
-			movebox.style.left =middleX+"px";
-		};
-		if( middleY >= evtTargetMinTop && middleY <= evtTargetMaxTop  ) {
-			movebox.style.top =middleY+10+"px";
-		}else if(middleY <= -evtTargetMinTop && middleY >= -evtTargetMaxTop && parentNode == IOS.ulBottom){
-			movebox.style.top =middleY+"px";
-		};
-		if( mousemoveFn) mousemoveFn(evt);
-	};
-	function mouseUp(evt) {
-		if(evt.target.className != flag) return;
-		var clientX = parseInt(clientX -IOS.section.offsetLeft),
-			clientY = parseInt(clientY -IOS.section.offsetTop);		
-		if( mouseupFn) mouseupFn(evt);
-		IOS.section.removeEventListener("mousemove", mouseMoved, false);
-	};
-};
-function drag1(arg) {
 	IOS.refresh();
-	var parentNode= arg.parentNode,
+	var parentNode =  arg.parentNode,
 		movebox = arg.moveEle,
 		flag = arg.flag,
 		mousedownFn= arg.mousedownFn,
 		mousemoveFn=arg.mousemoveFn,
 		mouseupFn =arg.mouseupFn;
-    var leftX=0, topY=0,sectionTopY,sectionLeftX;
-   	
-   
-
+    var sectionTopY,sectionLeftX,
+		evtTargetMinLeft = -movebox.offsetLeft,
+		evtTargetMaxLeft =parentNode.offsetWidth -movebox.offsetWidth+parseInt(getStyle(movebox,'paddingLeft')),
+		evtTargetMinTop =0,
+		evtTargetMaxTop =parentNode.offsetHeight - IOS.ulBottom.offsetHeight;
 
 	movebox.addEventListener("mousedown", mouseDown, false);
 	movebox.addEventListener("mouseup", mouseUp, false);
@@ -269,34 +153,29 @@ function drag1(arg) {
 		sectionTopY = evt.clientY-movebox.offsetTop;		
 		IOS.section.addEventListener("mousemove", mouseMoved, false);		
 		if( mousedownFn) mousedownFn(evt);
-	}
-
+	};
 	function mouseMoved(evt) {	
-		IOS.refresh();
-		targetElement = evt.target;
 		if(!IOS.animationFlag) return;
 		evt.preventDefault();		
 		if( movebox.parentNode == IOS.ulBottom ){
 		 	sectionTopY =sectionTopY-IOS.section.offsetHeight+IOS.ulBottom.offsetHeight;
 		 	firstMouseMovingAction = false;
-		 }
+		};
 		IOS.section.appendChild(movebox);	
 		movebox.style.position= "absolute";
 		movebox.style.zIndex= 1;
 		var	middleX= evt.clientX - sectionLeftX,
 			middleY= evt.clientY - sectionTopY;				
 		IOS.mouseInIOScoordinate=[middleX,middleY];
-		
-		if( middleX >=-10 && middleX <= 210){ 
+		if( middleX >=evtTargetMinLeft && middleX <= evtTargetMaxLeft){ 
 			movebox.style.left =middleX+"px";
 		};
-		if(middleY >= 0 && middleY <= 360 ) {			 
+		if(middleY >= evtTargetMinTop && middleY <= evtTargetMaxTop ) {			 
 			movebox.style.top =middleY+"px";
-		}else if ( middleY >  360 ){
-			movebox.style.top =360+"px";
+		}else if ( middleY >  evtTargetMaxTop ){
+			movebox.style.top =evtTargetMaxTop+"px";
 		}
 		if( mousemoveFn) mousemoveFn(evt);
-
 	};
 	function mouseUp(evt) {
 		if(evt.target.className != flag) return;
@@ -434,12 +313,10 @@ function mouseMovingDirectionFunction(arg){
 })();
 mouseMovingDirectionFunction({
 	slipeToleftFn : function(evt){
-					slipeToleftFn(evt);
-					
+					slipeToleftFn(evt);					
 					},
 	slipeTorightFn :function(evt){
 					slipeTorightFn();
-					//indicatorLight();
 					},
 	slipeToupFn : slipeToupFn,
 	slipeTodownFn : slipeTodownFn
@@ -503,7 +380,7 @@ function indicatorLight(){
 			IOS.indicatorLights[i].style.color = "#777";
 		}
 	}
-}
+};
 //IOS draging in ulMiddleList block -----------------------------------------------------------6
 function create_new_ulMiddle_or_move_to_neighbour_ulMiddle(evt){	
 	if (!currentUlMiddle() ) return;
@@ -516,7 +393,7 @@ function create_new_ulMiddle_or_move_to_neighbour_ulMiddle(evt){
 			createUlclassMiddle(index1);
 			var delay = setTimeout(slipeToleftFn, 5);
 			return;
-		}
+		};
 		slipeToleftFn();
 	};
 	if(clientX <= 10 ){
@@ -530,8 +407,6 @@ function create_new_ulMiddle_or_move_to_neighbour_ulMiddle(evt){
 	//currentUlMiddle().element.appendChild(evt.target.parentNode);
 };
 //IOS draging and creating new ulMiddleList----------------------------------------------------7
-
-
 //createUlclassMiddle();
 function createUlclassMiddle(value){
 	var ul = document.createElement("UL");
@@ -576,29 +451,6 @@ function setUlBottomliToCenter(){
 	};
 };
 setUlBottomliToCenter();
-
-
-function createUlclassMiddleInnerHTML(arguments){
-	var newUlMiddle='<ul class="middle">';
-	for (var i = arguments.length- 1; i >= 0; i--) {
-		newUlMiddle += '<li>';
-		newUlMiddle += '<div class="icons">';
-		if( !arguments[i][1] ) newUlMiddle += '<div class="close">x</div>';
-		newUlMiddle += '<h6>';
-		newUlMiddle += arguments[i][0];
-		newUlMiddle += '</h6>';
-		newUlMiddle += '</li>';
-	}
-	return newUlMiddle += '</ul>';	
-}
-
-
-
-
-
-
-
-
 function getStyle(element, attr) {
 	var value;
 	if (typeof window.getComputedStyle != 'undefined') {//W3C
@@ -607,9 +459,6 @@ function getStyle(element, attr) {
 		value = element.currentStyle[attr];
 	}
 	return value;
-}
-
-
-
+};
 
 })
