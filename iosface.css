@@ -285,11 +285,39 @@ footer button{
     transform:  rotate(-3deg);
   }   
 }
+@-webkit-keyframes shake1 {
+  0% ,50%, 100%{
+    -webkit-transform:  rotate(0deg);
+    transform:  rotate(0deg);
+  }
+  25%{
+    -webkit-transform:  rotate(3deg);
+    transform:  rotate(3deg);
+  } 
+  75%{
+    -webkit-transform:  rotate(-3deg);
+    transform:  rotate(-3deg);
+  }   
+}
 .shake1 {
   -webkit-animation-name: shake1;
   animation-name: shake1;   
 }
 @keyframes shake2 {
+  0% ,50%, 100%{
+    -webkit-transform:  rotate(0deg);
+    transform:  rotate(0deg);
+  }
+  25%{
+    -webkit-transform:  rotate(-3deg);
+    transform:  rotate(-3deg);
+  } 
+  75%{
+    -webkit-transform:  rotate(3deg);
+    transform:  rotate(3deg);
+  }   
+}
+@-webkit-keyframes shake2 {
   0% ,50%, 100%{
     -webkit-transform:  rotate(0deg);
     transform:  rotate(0deg);
@@ -317,6 +345,16 @@ footer button{
     transform:  translate3d(-2px, 0, 0);
   }  
 }
+@-webkit-keyframes positionChange1 {
+  from {
+    -webkit-transform:  translate3d(2px, 0, 0);
+    transform:  translate3d(2px, 0, 0);
+  }
+ to {
+    -webkit-transform:  translate3d(-2px, 0, 0);
+    transform:  translate3d(-2px, 0, 0);
+  }  
+}
 @keyframes positionChange2 {
   from {
     -webkit-transform:  translate3d(-1px, 0, 0);
@@ -327,7 +365,27 @@ footer button{
     transform:  translate3d(1px, 0, 0);
   }  
 }
+@-webkit-keyframes positionChange2 {
+  from {
+    -webkit-transform:  translate3d(-1px, 0, 0);
+    transform:  translate3d(-1px, 0, 0);
+  }
+ to {
+    -webkit-transform:  translate3d(1px, 0, 0);
+    transform:  translate3d(1px, 0, 0);
+  }  
+}
 @keyframes positionChange3 {
+  from {
+    -webkit-transform:  translate3d(0, 1px, 0);
+    transform:  translate3d(0, 1px, 0);
+  }
+ to {
+    -webkit-transform:  translate3d(0, -1px, 0);
+    transform:  translate3d(0, -1px, 0);
+  }  
+}
+@-webkit-keyframes positionChange3 {
   from {
     -webkit-transform:  translate3d(0, 1px, 0);
     transform:  translate3d(0, 1px, 0);

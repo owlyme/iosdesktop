@@ -194,7 +194,8 @@ function drag(arg) {
 	function mouseUp(evt) {
 		if(evt.target.className != flag) return;
 		var clientX = parseInt(sectionLeftX -IOS.section.offsetLeft),
-			clientY = parseInt(sectionTopY -IOS.section.offsetTop);		
+			clientY = parseInt(sectionTopY -IOS.section.offsetTop);	
+
 		if( mouseupFn) mouseupFn(evt);
 		IOS.section.removeEventListener("mousemove", mouseMoved, false);
 	};	
@@ -269,6 +270,7 @@ function nodeAIsDescendantsOfNodeB(nodeA,nodeB){
 };
 //以鼠标的位置定图片的顺序 ----------------------------------------------------------------------4
 function reorderLists(clientX,clientY,targetNode){
+
 	IOS.refresh();
 	var clientX = parseInt(clientX -IOS.section.offsetLeft),
 		clientY = parseInt(clientY -IOS.section.offsetTop),
@@ -276,6 +278,10 @@ function reorderLists(clientX,clientY,targetNode){
 		targetNodeHeight = parseInt(IOS.icons[0].offsetHeight),
 		currentUl = currentUlMiddle().element,	
 		currentUlLi= currentUl.querySelectorAll("li");
+		alert("clientX:"+clientX+"\n"+
+			"clientY:"+clientY+"\n"+
+			"targetNodeWidth:"+targetNodeWidth+"\n"+
+			"targetNodeHeight:"+targetNodeHeight+"\n");
 	for(var i=0; i< 4; i++){
 		for(var j=0; j<7 ;j++){
 			if( clientX >= targetNodeWidth*(i-0.5) && clientX < targetNodeWidth*(i+0.5) || clientX >210 ){
@@ -283,13 +289,16 @@ function reorderLists(clientX,clientY,targetNode){
 					var evtTargetHoverIndex= j*4 + i ;
 					if(clientX >210) {
 						i =4;
-						evtTargetHoverIndex = evtTargetHoverIndex +i;
+						evtTargetHoverIndex = evtTargetHoverIndex +i;						
 					};
+
 					if( clientY>=0 && clientY<360 && currentUlLi.length < 24  ){
 						if(evtTargetHoverIndex > currentUlLi.length-1 && evtTargetHoverIndex == 24){
 							currentUl.appendChild(targetNode);
+							
 						}else{
 							currentUl.insertBefore(targetNode,currentUlLi[evtTargetHoverIndex]);
+							alert(targetNode);
 						};							
 					};
 					if( clientY >=360  && IOS.iconsBottom.length < 4 ){
@@ -300,7 +309,6 @@ function reorderLists(clientX,clientY,targetNode){
 						};
 					}
 					styleEqualNull(targetNode);	
-					return ;
 				};
 			};
 		};
@@ -323,7 +331,7 @@ function setLisPositionToNull(){
 	}
 };
 function styleEqualNull(ele){
-	ele.style = " ";
+	ele.setAttribute("style" ,"float:left;");
 };
 function currentUlMiddle(){
 	IOS.ulMiddleList=selectors("section ul.middle");
