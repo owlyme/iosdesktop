@@ -11,6 +11,7 @@ function(){
 	var CLOCK = setInterval(function(){
 			selectors("nav span.center")[0].innerText= (new Date()).toString().substring(16,21);
 		},1000);
+
 //IOS Object ------------------------------------------------------------------------------------1
 var IOS={
 		activingFlag : false,
@@ -80,7 +81,20 @@ IOS.dragIcons = function(){
 	if(IOS.animationFlag){		
 		for(var i=0 ; i< IOS.icons.length; i++){
 			var movebox = IOS.icons[i];
-				drag({	
+			drag({	
+			parentNode : IOS.section,			
+			moveEle: movebox,
+			flag: "icons",
+			mousedownFn : setLisPositionToAbsoulte,
+			mousemoveFn : function(evt){create_new_ulMiddle_or_move_to_neighbour_ulMiddle(evt)},
+			mouseupFn : function(evt){
+				reorderLists(evt.clientX,evt.clientY,evt.target.parentNode);
+				setLisPositionToNull();
+				removeUlclassMiddle();
+				setUlBottomliToCenter();
+			}
+			});
+			toucDrag({	
 				parentNode : IOS.section,			
 				moveEle: movebox,
 				flag: "icons",
@@ -146,10 +160,6 @@ function drag(arg) {
 
 	movebox.addEventListener("mousedown", mouseDown, false);
 	movebox.addEventListener("mouseup", mouseUp, false);
-
-	movebox.addEventListener("touchstart",mouseDown, false);
-	movebox.addEventListener("touchend", mouseUp, false);
-
     function mouseDown(evt) {
     	if(evt.target.className != flag) return;
     	sectionLeftX = evt.clientX-movebox.offsetLeft,
@@ -187,12 +197,63 @@ function drag(arg) {
 			clientY = parseInt(sectionTopY -IOS.section.offsetTop);		
 		if( mouseupFn) mouseupFn(evt);
 		IOS.section.removeEventListener("mousemove", mouseMoved, false);
-		movebox.removeEventListener("mousedown", mouseDown, false);
-		movebox.removeEventListener("mouseup", mouseUp, false);
+	};	
+};
+function toucDrag(arg) {
+	IOS.refresh();
+	var parentNode =  arg.parentNode,
+		movebox = arg.moveEle,
+		flag = arg.flag,
+		mousedownFn= arg.mousedownFn,
+		mousemoveFn=arg.mousemoveFn,
+		mouseupFn =arg.mouseupFn;
+    var sectionTopY,sectionLeftX,
+		evtTargetMinLeft = -movebox.offsetLeft,
+		evtTargetMaxLeft =parentNode.offsetWidth -movebox.offsetWidth+parseInt(getStyle(movebox,'paddingLeft')),
+		evtTargetMinTop =0,
+		evtTargetMaxTop =parentNode.offsetHeight - IOS.ulBottom.offsetHeight;
 
+	movebox.addEventListener("touchstart",mouseDown, false);
+	movebox.addEventListener("touchend", mouseUp, false);
+
+    function mouseDown(evt) {
+    	var evt = evt.touches[0];
+    	if(evt.target.className != flag) return;
+    	sectionLeftX = evt.clientX-movebox.offsetLeft,
+		sectionTopY = evt.clientY-movebox.offsetTop;
+		IOS.section.addEventListener("touchmove", mouseMoved, false);		
+		if( mousedownFn) mousedownFn(evt);
+	};
+	function mouseMoved(evt) {
+		var evt = evt.touches[0];
+		if(!IOS.animationFlag) return;
+		evt.preventDefault();
+		if( movebox.parentNode == IOS.ulBottom ){
+		 	sectionTopY =sectionTopY-IOS.section.offsetHeight+IOS.ulBottom.offsetHeight;
+		 	firstMouseMovingAction = false;
+		};
+		IOS.section.appendChild(movebox);	
+		movebox.style.position= "absolute";
+		movebox.style.zIndex= 1;
+		var	middleX= evt.clientX - sectionLeftX,
+			middleY= evt.clientY - sectionTopY;				
+		IOS.mouseInIOScoordinate=[middleX,middleY];
+		if( middleX >=evtTargetMinLeft && middleX <= evtTargetMaxLeft){ 
+			movebox.style.left =middleX+"px";
+		};
+		if(middleY >= evtTargetMinTop && middleY <= evtTargetMaxTop ) {			 
+			movebox.style.top =middleY+"px";
+		}else if ( middleY >  evtTargetMaxTop ){
+			movebox.style.top =evtTargetMaxTop+"px";
+		}
+		if( mousemoveFn) mousemoveFn(evt);
+	};
+	function mouseUp(evt) {
+		if(evt.target.className != flag) return;
+		var clientX = parseInt(sectionLeftX -IOS.section.offsetLeft),
+			clientY = parseInt(sectionTopY -IOS.section.offsetTop);		
+		if( mouseupFn) mouseupFn(evt);
 		IOS.section.removeEventListener("touchmove", mouseMoved, false);
-		movebox.removeEventListener("touchstart",mouseDown, false);
-		movebox.removeEventListener("touchend", mouseUp, false);
 	};	
 };
 function randomNumber(maxNum){
@@ -285,12 +346,6 @@ function mouseMovingDirectionFunction(arg){
 	});
 	IOS.section.addEventListener("mouseup",orient);
 
-	IOS.section.addEventListener("touchstart",getStart);
-	IOS.section.addEventListener("touchmove",function(evt){
-		evt.preventDefault();
-	});
-	IOS.section.addEventListener("touchend",orient);
-	
 	function getStart(evt){
 		evt.preventDefault();
 		IOS.startPoint= [evt.clientX, evt.clientY];
@@ -319,12 +374,50 @@ function mouseMovingDirectionFunction(arg){
 				};
 			};
 		};
-	};
-	IOS.section.removeEventListener("mousedown",getStart);
-	IOS.section.removeEventListener("mouseup",orient);
+	};	
+};
+function touchMovingDirectionFunction(arg){
+	IOS.refresh();
+	var direction, stepX, stepY, clientX, clientY,targetElement;
+	IOS.startPoint = [0,0],
+	IOS.endPoint = [0,0];
+	IOS.section.addEventListener("touchstart",getStart);
+	IOS.section.addEventListener("touchmove",function(evt){
+		evt.preventDefault();
+	});
+	IOS.section.addEventListener("touchend",orient);
 
-	IOS.section.removeEventListener("touchstart",getStart);
-	IOS.section.removeEventListener("touchend",orient);
+	function getStart(evt){
+		var evt = evt.touches[0];
+		evt.preventDefault();
+		IOS.startPoint= [evt.clientX, evt.clientY];
+		clientX = IOS.startPoint[0] -IOS.section.offsetLeft;
+		clientY = IOS.startPoint[1] -IOS.section.offsetTop;
+	};
+	
+	function orient(evt){
+		var evt = evt.touches[0];
+		if (0 <= clientX <= 260 && -12<=clientY <=420) {
+			IOS.endPoint= [evt.clientX, evt.clientY];
+			stepX =IOS.endPoint[0]-IOS.startPoint[0];
+			stepY =IOS.endPoint[1]-IOS.startPoint[1];
+			if( Math.abs(stepX) > Math.abs(stepY) && Math.abs(stepX) >20 ){
+				if(!IOS.animationFlag || evt.target.className != "icons"){
+					if(stepX >0 && arg.slipeTorightFn){
+						arg.slipeTorightFn(evt);
+					}else if( stepX <0 && arg.slipeToleftFn ){
+						arg.slipeToleftFn(evt);
+					};
+				};
+			}else if( Math.abs(stepX) <= Math.abs(stepY) && Math.abs(stepY) >20 && !IOS.animationFlag ){
+				if( stepY <0 && arg.slipeToupFn){
+					arg.slipeToupFn(evt);
+				}else if(  stepY >0 && arg.slipeTodownFn ){
+					arg.slipeTodownFn(evt);
+				};
+			};
+		};
+	};	
 };
 (function(){
 	IOS.indicatorLights[1].style.color = "#fff";
@@ -333,6 +426,16 @@ function mouseMovingDirectionFunction(arg){
 	};		
 })();
 mouseMovingDirectionFunction({
+	slipeToleftFn : function(evt){
+					slipeToleftFn(evt);					
+					},
+	slipeTorightFn :function(evt){
+					slipeTorightFn();
+					},
+	slipeToupFn : slipeToupFn,
+	slipeTodownFn : slipeTodownFn
+});
+touchMovingDirectionFunction({
 	slipeToleftFn : function(evt){
 					slipeToleftFn(evt);					
 					},
