@@ -270,7 +270,6 @@ function nodeAIsDescendantsOfNodeB(nodeA,nodeB){
 };
 //以鼠标的位置定图片的顺序 ----------------------------------------------------------------------4
 function reorderLists(clientX,clientY,targetNode){
-
 	IOS.refresh();
 	var clientX = parseInt(clientX -IOS.section.offsetLeft),
 		clientY = parseInt(clientY -IOS.section.offsetTop),
@@ -278,10 +277,6 @@ function reorderLists(clientX,clientY,targetNode){
 		targetNodeHeight = parseInt(IOS.icons[0].offsetHeight),
 		currentUl = currentUlMiddle().element,	
 		currentUlLi= currentUl.querySelectorAll("li");
-<<<<<<< HEAD
-=======
-		
->>>>>>> 81792c707e3458f89db6f75181a3f6c63fb57b61
 	for(var i=0; i< 4; i++){
 		for(var j=0; j<7 ;j++){
 			if( clientX >= targetNodeWidth*(i-0.5) && clientX < targetNodeWidth*(i+0.5) || clientX >210 ){
@@ -390,6 +385,7 @@ function touchMovingDirectionFunction(arg){
 	IOS.endPoint = [0,0];
 	IOS.section.addEventListener("touchstart",getStart);
 	IOS.section.addEventListener("touchmove",function(evt){
+		var evt = evt.touches[0];
 		evt.preventDefault();
 	});
 	IOS.section.addEventListener("touchend",orient);
