@@ -278,10 +278,6 @@ function reorderLists(clientX,clientY,targetNode){
 		targetNodeHeight = parseInt(IOS.icons[0].offsetHeight),
 		currentUl = currentUlMiddle().element,	
 		currentUlLi= currentUl.querySelectorAll("li");
-		alert("clientX:"+clientX+"\n"+
-			"clientY:"+clientY+"\n"+
-			"targetNodeWidth:"+targetNodeWidth+"\n"+
-			"targetNodeHeight:"+targetNodeHeight+"\n");
 	for(var i=0; i< 4; i++){
 		for(var j=0; j<7 ;j++){
 			if( clientX >= targetNodeWidth*(i-0.5) && clientX < targetNodeWidth*(i+0.5) || clientX >210 ){
@@ -298,7 +294,6 @@ function reorderLists(clientX,clientY,targetNode){
 							
 						}else{
 							currentUl.insertBefore(targetNode,currentUlLi[evtTargetHoverIndex]);
-							alert(targetNode);
 						};							
 					};
 					if( clientY >=360  && IOS.iconsBottom.length < 4 ){
