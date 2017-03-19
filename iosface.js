@@ -278,6 +278,10 @@ function reorderLists(clientX,clientY,targetNode){
 		targetNodeHeight = parseInt(IOS.icons[0].offsetHeight),
 		currentUl = currentUlMiddle().element,	
 		currentUlLi= currentUl.querySelectorAll("li");
+<<<<<<< HEAD
+=======
+		
+>>>>>>> 81792c707e3458f89db6f75181a3f6c63fb57b61
 	for(var i=0; i< 4; i++){
 		for(var j=0; j<7 ;j++){
 			if( clientX >= targetNodeWidth*(i-0.5) && clientX < targetNodeWidth*(i+0.5) || clientX >210 ){
