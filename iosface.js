@@ -147,11 +147,15 @@ function drag(arg) {
 	movebox.addEventListener("mousedown", mouseDown, false);
 	movebox.addEventListener("mouseup", mouseUp, false);
 
+	movebox.addEventListener("touchstart",mouseDown, false);
+	movebox.addEventListener("touchend", mouseUp, false);
+
     function mouseDown(evt) {
     	if(evt.target.className != flag) return;
     	sectionLeftX = evt.clientX-movebox.offsetLeft,
 		sectionTopY = evt.clientY-movebox.offsetTop;		
-		IOS.section.addEventListener("mousemove", mouseMoved, false);		
+		IOS.section.addEventListener("mousemove", mouseMoved, false);
+		IOS.section.addEventListener("touchmove", mouseMoved, false);		
 		if( mousedownFn) mousedownFn(evt);
 	};
 	function mouseMoved(evt) {	
@@ -183,6 +187,12 @@ function drag(arg) {
 			clientY = parseInt(sectionTopY -IOS.section.offsetTop);		
 		if( mouseupFn) mouseupFn(evt);
 		IOS.section.removeEventListener("mousemove", mouseMoved, false);
+		movebox.removeEventListener("mousedown", mouseDown, false);
+		movebox.removeEventListener("mouseup", mouseUp, false);
+
+		IOS.section.removeEventListener("touchmove", mouseMoved, false);
+		movebox.removeEventListener("touchstart",mouseDown, false);
+		movebox.removeEventListener("touchend", mouseUp, false);
 	};	
 };
 function randomNumber(maxNum){
@@ -272,8 +282,14 @@ function mouseMovingDirectionFunction(arg){
 	IOS.section.addEventListener("mousedown",getStart);
 	IOS.section.addEventListener("mousemove",function(evt){
 		evt.preventDefault();
-	})
+	});
 	IOS.section.addEventListener("mouseup",orient);
+
+	IOS.section.addEventListener("touchstart",getStart);
+	IOS.section.addEventListener("touchmove",function(evt){
+		evt.preventDefault();
+	});
+	IOS.section.addEventListener("touchend",orient);
 	
 	function getStart(evt){
 		evt.preventDefault();
@@ -304,6 +320,11 @@ function mouseMovingDirectionFunction(arg){
 			};
 		};
 	};
+	IOS.section.removeEventListener("mousedown",getStart);
+	IOS.section.removeEventListener("mouseup",orient);
+
+	IOS.section.removeEventListener("touchstart",getStart);
+	IOS.section.removeEventListener("touchend",orient);
 };
 (function(){
 	IOS.indicatorLights[1].style.color = "#fff";
